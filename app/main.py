@@ -1,26 +1,38 @@
-# Se importan las librerías necesarias para crear la API REST con FastAPI y manejar la base de datos con SQLAlchemy.
 from fastapi import FastAPI, HTTPException, status, Depends
 from sqlalchemy.orm import Session
+
 from app.models import UserRegister, UserLogin, AuthResponse
 from app.database import engine, Base, get_db
 from app import auth
+from app.routes.libros import router as libros_router
 
-# Crea las tablas en MySQL automáticamente si aún no existen
+
 Base.metadata.create_all(bind=engine)
 
+
 app = FastAPI(
-    title="Servicio de Autenticación",
-    description="API para el registro e inicio de sesión de usuarios",
-    version="1.0.0"
+    title="API Biblioteca Virtual Lumina",
+    description="API REST para autenticación de usuarios y gestion de libros de la Biblioteca Virtual Lumina",
+    version="2.0.0"
 )
-# Se define la ruta para registrar un nuevo usuario en la base de datos MySQL.
+
+
+app.include_router(libros_router)
+
+
+@app.get("/", tags=["Inicio"])
+def inicio():
+    return {
+        "mensaje": "Bienvenido a la API de la Biblioteca Virtual Lumina"
+    }
+
+
 @app.post(
     "/register",
     response_model=AuthResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Registro de nuevos usuarios"
 )
-# Se define la función para manejar la solicitud de registro de un nuevo usuario.
 def register(user: UserRegister, db: Session = Depends(get_db)):
     success = auth.register_user(user, db)
 
@@ -29,23 +41,27 @@ def register(user: UserRegister, db: Session = Depends(get_db)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Error en el registro: el nombre de usuario ya existe."
         )
-    
-    return AuthResponse(message="Registro realizado de manera satisfactoria.")
-# Se define la ruta para autenticar a un usuario existente en la base de datos MySQL.
+
+    return AuthResponse(
+        message="Registro realizado de manera satisfactoria."
+    )
+
+
 @app.post(
     "/login",
     response_model=AuthResponse,
     status_code=status.HTTP_200_OK,
-    summary="Inicio de sesión de usuarios"
+    summary="Inicio de sesion de usuarios"
 )
-# Se define la función para manejar la solicitud de inicio de sesión de un usuario existente.
 def login(user: UserLogin, db: Session = Depends(get_db)):
     authenticated = auth.authenticate_user(user, db)
 
     if not authenticated:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Error en la autenticación: usuario o contraseña incorrectos."
+            detail="Error en la autenticacion: usuario o contraseña incorrectos."
         )
-    
-    return AuthResponse(message="Autenticación satisfactoria.")
+
+    return AuthResponse(
+        message="Autenticacion satisfactoria."
+    )

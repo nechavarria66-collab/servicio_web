@@ -1,6 +1,6 @@
 # Servicio de modelos de datos con Pydantic
 from pydantic import BaseModel, Field
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Boolean
 from app.database import Base
 
 # 1. Modelo de SQLAlchemy (Tabla en MySQL)
@@ -41,4 +41,36 @@ class AuthResponse(BaseModel):
     # Se define el campo 'message' con una descripción para la respuesta del servicio de autenticación.
     message: str = Field(..., description="Mensaje del estado de la operación (éxito o error)")
 
-    
+# 3. Modelo SQLAlchemy para la tabla de libros
+class LibroTable(Base):
+    __tablename__ = "libros"
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True,
+        autoincrement=True
+    )
+
+    titulo = Column(
+        String(150),
+        nullable=False
+    )
+
+    autor = Column(
+        String(150),
+        nullable=False
+    )
+
+    categoria = Column(
+        String(100),
+        nullable=False
+    )
+
+    disponible = Column(
+        Boolean,
+        default=True,
+        nullable=False
+    )
+
+
