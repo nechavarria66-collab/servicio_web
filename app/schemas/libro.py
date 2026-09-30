@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field
 
-
 # Datos comunes de un libro
 class LibroBase(BaseModel):
     titulo: str = Field(
